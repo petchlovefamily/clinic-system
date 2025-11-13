@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  // This output path points to the default location node_modules
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     Int           @id @default(autoincrement())
+  username               String        @unique
+  password               String
+  role                   Role
+  appointmentsCreated    Appointment[] @relation("CreatedByUser")
+  assignedAppointments   Appointment[] @relation("AssignedClinician")
+  deletedAt              DateTime?
+}
+
+enum Role {
+  CLINICIAN
+  RECEPTION
+  ADMIN
+}
+
+model Patient {
+  id                 Int           @id @default(autoincrement())
+  recordNumber       String        @unique
+  firstName          String
+  lastName           String
+  gender             String
+  dateOfBirth        DateTime
+  allergies          String?       @db.Text
+  medicalHistory     String?       @db.Text
+  currentMedications String?       @db.Text
+  appointments       Appointment[]
+  deletedAt          DateTime?
+}
+
+model Appointment {
+  id            Int               @id @default(autoincrement())
+  recordNumber  String            @unique
+  patientId     Int
+  patient       Patient           @relation(fields: [patientId], references: [id])
+  clinicianId   Int
+  clinician     User              @relation(name: "AssignedClinician", fields: [clinicianId], references: [id])
+  createdById   Int
+  createdBy     User              @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  startTime     DateTime
+  endTime       DateTime
+  note          String?           @db.Text
+  status        AppointmentStatus @default(PENDING)
+  clinicianNote String?           @db.Text
+  deletedAt     DateTime?
+
+  @@index([clinicianId, startTime, endTime])
+}
+
+enum AppointmentStatus {
+  PENDING
+  COMPLETED
+}

@@ -1,0 +1,18 @@
+# สังเกตว่าผมลบบรรทัด 'version' ออกไปแล้ว
+services:
+  db:
+    image: mariadb:10.6
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysecretpassword
+      MYSQL_DATABASE: clinic_db
+    ports:
+      - "3306:3306"
+    volumes:
+      # บรรทัดนี้บอกว่า "ใช้กล่องเก็บของที่ชื่อ mariadb-data"
+      - mariadb-data:/var/lib/mysql
+
+# บรรทัดนี้ (ที่อยู่ระดับนอกสุด) คือการ "สร้าง" กล่องเก็บของนั้น
+# นี่คือส่วนที่น่าจะขาดหายไป หรือเยื้องผิดครับ
+volumes:
+  mariadb-data:
